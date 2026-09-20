@@ -1,0 +1,11 @@
+# 実行ログの除外
+aws-config-backup/logs/
+*.log
+
+# 一時ファイルの除外
+*.tmp
+
+# (オプション) ローカルでのみ保持し、Git管理から除外する場合
+# aws-config-backup/latest/
+
+
