@@ -334,7 +334,7 @@ aws sts get-caller-identity
 
 3. スクリプトを実行します。
    ```bash
-   ./backup.sh
+   ./script/aws_backup.zsh
    ```
 
 実行後、`aws-config-backup/latest/` 配下に JSON ファイルが出力され、`aws-config-backup/logs/backup.log` にログが保存されます。
