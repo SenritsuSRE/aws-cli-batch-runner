@@ -71,16 +71,16 @@ flowchart TD
 
 ## Architecture
 
-
 ```mermaid
 flowchart TD
     A[AWS Environment] --> B[aws_backup.zsh]
     B --> C[backup_targets]
-    C --> D[JSON Snapshot<br>(latest/*.json)]
+    C --> D["JSON Snapshot<br>(latest/*.json)"]
     D --> E[GitHub]
     E --> F[Claude Code / ChatGPT]
     F --> G[Documentation]
     G --> H[AWS CDK]
+```
 
 
 ---
