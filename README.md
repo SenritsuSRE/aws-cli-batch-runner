@@ -62,43 +62,32 @@ flowchart TD
 
 ## Use Cases
 
-取得した JSON を Claude や ChatGPT に読み込ませることで、AWS 環境の分析および各種ドキュメント生成を支援できます。
+取得したJSONをAIに読み込ませることで、AWS 環境の分析/各種ドキュメント生成を加速できます。
 
-### Parameter Sheet
+### Parameter Sheet(パラメータシートの生成)
 
-AWS 環境のパラメータシートを自動生成します。
+AWS 環境の構成情報から、各種設定値や一覧を効率的に作成します。
 
-対象例:
-- VPC / Subnet / Route Table / Security Group
-- IAM / KMS / S3
-- Lambda / API Gateway / Cognito / Aurora / RDS Proxy
+- メリット: 手作業による転記ミスを防ぎつつ、実環境に即した一覧を素早く得られます。
 
-従来は手作業で作成していた構成一覧や設定値一覧を効率的に作成できます。
 
 ---
 
-### Design Documents
+### Design Documents(設計書の補助)
 
-AWS 環境の設計書を生成ます。
+JSON を根拠データとして利用し、各種設計書のドラフト作成を支援します。
 
-生成対象例:
-- 基本設計書 / 詳細設計書
-- システム構成図
-- 運用設計書 / 監視設計書 / セキュリティ設計書
-
-JSON を根拠データとして利用することで、設計書と実環境の整合性を高めることができます。
+- 生成対象例: 基本設計書 / 詳細設計書、システム構成図、運用・監視・セキュリティ設計書
+- メリット: 実環境とドキュメントの乖離を防ぎ、正確性の高いドキュメント作成が可能
 
 ---
 
-### Infrastructure Analysis & IaC
+### Infrastructure Analysis & IaC(構成分析・IaC化)
 
-AWS 環境の分析および IaC 化を支援ます。
+既存環境の調査や、IaCへの移行検討を多角的にサポートします。
 
-分析例:
-- AWS構成分析 / リソース依存関係分析 / セキュリティレビュー
-- AWS CDK / Terraform / CloudFormation への移行検討・コード生成
-
-特に既存環境の IaC 化を行う際の事前調査において、高い効果を発揮します。
+- 分析例: AWS構成分析 / リソース依存関係分析 / セキュリティレビュー
+- 移行支援: AWS CDK / Terraform / CloudFormation への移行方針策定およびコード生成の壁打ち
 
 ---
 
