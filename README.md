@@ -1,4 +1,4 @@
-# AWS Config Backup
+# aws-context-builder
 
 AIと人間の責任境界を明確にし、AWS環境の構造化・IaC・ドキュメント化を加速させるためのツールを提供します。
 
