@@ -1,31 +1,35 @@
 # AWS Config Backup
 
-AWS環境を構造化データ(JSON)へ変換し、設計書作成および IaC(CDK) 化を支援するための基盤である。
+AWS環境を構造化データ(JSON)へ変換し、設計書作成および IaC(CDK) 化を支援するためのスクリプトです。
 
-本プロジェクトは単なる AWS バックアップツールではない。
-AWS 環境の構成情報を継続的に収集し、GitHub 上で履歴管理し、さらに AI が解析可能な形式へ変換することで、ドキュメント作成と IaC 化を加速させることを目的としている。
+本プロジェクトは単なる AWS バックアップツールではなく、
+AWS 環境の構成情報を継続的に収集し、GitHub 上で履歴管理し、さらに AI が解析可能な形式へ変換することで、
+ドキュメント作成と IaC 化を加速させることを目的としています。
+
+
+## 🔒 Security Note / セキュリティについて
+本リポジトリはAWS構成を自動収集するスクリプト（エンジン）を提供しています。
+
+- 本スクリプトを実行して生成される構成データのJSONやログファイルには、機密性の高い情報が含まれる可能性があります。
+- これらのデータをGitHub等で管理・共有する場合は、**必ず「Private（非公開）リポジトリ」を作成して運用してください。**
+- AWSの認証情報（アクセスキー等）をコードやリポジトリ内に直接記述せず、必ず環境変数やローカルのプロファイル設定を利用してください。
 
 ---
 
 ## Background
 
-既存 AWS 環境の調査では、一般的に以下のような作業が発生する。
+既存 AWS 環境の調査では、一般的に以下のような作業が発生します。
 
-```text
-AWS Console
-    ↓
-画面確認
-    ↓
-Excel転記
-    ↓
-構成図作成
-    ↓
-パラメータシート作成
-    ↓
-基本設計書作成
+```mermaid
+flowchart TD
+    A[AWS Console] --> B[画面確認]
+    B --> C[Excel転記]
+    C --> D[構成図作成]
+    D --> E[パラメータシート作成]
+    E --> F[基本設計書作成]
 ```
 
-この方法には以下の課題がある。
+この方法には以下の課題があります。
 
 - 調査コストが高い
 - 転記ミスが発生しやすい
@@ -33,31 +37,25 @@ Excel転記
 - 属人化しやすい
 - IaC 化の事前調査に多くの時間を要する
 
-本プロジェクトは、この手作業中心のプロセスを自動化するために作られた。
+本プロジェクトは、この手作業中心のプロセスを自動化するために作られたものです。
 
 ---
 
 ## Concept
 
-本プロジェクトの目的は AWS 環境を AI が理解可能な形式へ変換することである。
+本プロジェクトの目的は AWS 環境を AI が理解可能な形式へ変換することです。
 
-```text
-AWS Environment
-        ↓
-AWS CLI
-        ↓
-JSON
-        ↓
-GitHub
-        ↓
-AI Analysis
-        ↓
-Parameter Sheet
-        ↓
-Design Document
-        ↓
-Infrastructure as Code
+```mermaid
+flowchart TD
+    A[AWS Environment] --> B[AWS CLI]
+    B --> C[JSON]
+    C --> D[GitHub]
+    D --> E[AI Analysis]
+    E --> F[Parameter Sheet]
+    F --> G[Design Document]
+    G --> H[Infrastructure as Code]
 ```
+
 
 人間が AWS Console を見ながら設計書を書くのではなく、
 
@@ -68,53 +66,22 @@ Infrastructure as Code
 - 設計書を生成する
 - CDKへ変換する
 
-という流れを実現する。
+という流れを実現します。
 
 ---
 
 ## Architecture
 
-```text
-┌─────────────────┐
-│ AWS Environment │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ aws_backup.zsh  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ backup_targets  │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ JSON Snapshot   │
-│ (latest/*.json) │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ GitHub          │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Claude Code /   │
-│ ChatGPT         │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Documentation   │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ CDK             │
-└─────────────────┘
+
+```mermaid
+flowchart TD
+    A[AWS Environment] --> B[aws_backup.zsh]
+    B --> C[backup_targets]
+    C --> D[JSON Snapshot<br>(latest/*.json)]
+    D --> E[GitHub]
+    E --> F[Claude Code / ChatGPT]
+    F --> G[Documentation]
+    G --> H[AWS CDK]
 ```
 
 ---
@@ -123,9 +90,9 @@ Infrastructure as Code
 
 ### 1. Separation of Concerns
 
-バックアップ対象と処理ロジックを分離する。
+バックアップ対象と処理ロジックを分離します。
 
-バックアップ対象は `backup_targets.md` に定義する。
+バックアップ対象は `backup_targets.md` に定義します。
 
 形式:
 
@@ -141,8 +108,8 @@ security-groups|aws ec2 describe-security-groups
 kms-keys|aws kms list-keys
 ```
 
-バックアップ対象を追加する場合でも、スクリプト本体を修正する必要はない。
-新しいAWSサービスをバックアップ対象へ追加する場合は、`backup_targets.md` にAWS CLIコマンドを1行追加するだけでよい。
+バックアップ対象を追加する場合でも、スクリプト本体を修正する必要はありません。
+新しいAWSサービスをバックアップ対象へ追加する場合は、`backup_targets.md` にAWS CLIコマンドを1行追加するだけでOKです。
 
 これにより、
 
@@ -151,7 +118,7 @@ kms-keys|aws kms list-keys
 - 拡張性を向上できる
 - AWSサービス追加時の対応コストを削減できる
 
-というメリットがある。
+というメリットがあります。
 
 ---
 
@@ -159,12 +126,10 @@ kms-keys|aws kms list-keys
 
 取得した構成情報は JSON のまま Git 管理する。
 
-```text
-AWS
- ↓
-JSON
- ↓
-Git
+```mermaid
+flowchart TD
+    A[AWS] --> B[JSON]
+    B --> C[Git]
 ```
 
 これにより、
@@ -175,9 +140,9 @@ Git
 - 構成監査
 - 設計書と実環境の比較
 
-が可能となる。
+が可能となります。
 
-JSONをGit管理することで、AWS環境のスナップショットを継続的に蓄積できる。
+JSONをGit管理することで、AWS環境のスナップショットを継続的に蓄積できます。
 
 また、過去のコミットを参照することで、
 
@@ -185,23 +150,24 @@ JSONをGit管理することで、AWS環境のスナップショットを継続�
 - 何が変更されたか
 - 誰が変更したか
 
-を追跡できるため、構成管理の品質向上にも繋がる。
+を追跡できるため、構成管理の品質向上にも繋がります。
 
-本プロジェクトでは、Gitを単なるソースコード管理ツールではなく、AWS構成管理データベースとして活用する。
+本プロジェクトでは、Gitを単なるソースコード管理ツールではなく、AWS構成管理データベースとして活用します。
 
 ---
 
 ### 3. AI First
 
-本プロジェクトは AI 活用を前提としている。
+本プロジェクトは AI 活用を前提とします。
 
-AI は AWS Console を直接参照できない。
-一方で、JSON は構造化データであり、そのまま解析できる。
+AI は AWS Console を直接参照できません。
+AI が AWS CLIコマンドを実行することはできますが、この
+一方で、JSON は構造化データであり、そのまま解析できます。
 
-そのため本プロジェクトでは、`Human Readable` よりも `AI Readable` を重視している。
+そのため本プロジェクトでは、`Human Readable` よりも `AI Readable` を重視しています。
 
-取得した JSON は単なるバックアップデータではない。
-AI による分析やドキュメント生成のための入力データとして利用することを前提としている。
+取得した JSON は単なるバックアップデータではありません。
+AI による分析やドキュメント生成のための入力データとして利用することを前提としています。
 
 例えば、収集した JSON を Claude や ChatGPT に読み込ませることで、
 
@@ -213,51 +179,51 @@ AI による分析やドキュメント生成のための入力データとし�
 - システム構成図作成
 - CDK 化方針策定
 
-などを支援できる。
+などを支援できます。
 
-本プロジェクトの本質は、**AWS 環境を AI が理解可能な構造化データへ変換すること** にある。
+本プロジェクトの本質は、**AWS 環境を AI が理解可能な構造化データへ変換すること** にあリます。
 
 ---
 
 ## Use Cases
 
-取得した JSON を Claude や ChatGPT に読み込ませることで、AWS 環境の分析および各種ドキュメント生成を支援できる。
+取得した JSON を Claude や ChatGPT に読み込ませることで、AWS 環境の分析および各種ドキュメント生成を支援できます。
 
 ### Parameter Sheet
 
-AWS 環境のパラメータシートを自動生成する。
+AWS 環境のパラメータシートを自動生成します。
 
 対象例:
 - VPC / Subnet / Route Table / Security Group
 - IAM / KMS / S3
 - Lambda / API Gateway / Cognito / Aurora / RDS Proxy
 
-従来は手作業で作成していた構成一覧や設定値一覧を効率的に作成できる。
+従来は手作業で作成していた構成一覧や設定値一覧を効率的に作成できます。
 
 ---
 
 ### Design Documents
 
-AWS 環境の設計書を生成する。
+AWS 環境の設計書を生成ます。
 
 生成対象例:
 - 基本設計書 / 詳細設計書
 - システム構成図
 - 運用設計書 / 監視設計書 / セキュリティ設計書
 
-JSON を根拠データとして利用することで、設計書と実環境の整合性を高めることができる。
+JSON を根拠データとして利用することで、設計書と実環境の整合性を高めることができます。
 
 ---
 
 ### Infrastructure Analysis & IaC
 
-AWS 環境の分析および IaC 化を支援する。
+AWS 環境の分析および IaC 化を支援ます。
 
 分析例:
 - AWS構成分析 / リソース依存関係分析 / セキュリティレビュー
 - AWS CDK / Terraform / CloudFormation への移行検討・コード生成
 
-特に既存環境の IaC 化を行う際の事前調査において、高い効果を発揮する。
+特に既存環境の IaC 化を行う際の事前調査において、高い効果を発揮します。
 
 ---
 
@@ -283,7 +249,7 @@ aws-config-backup/
 
 ## Security & Privacy (機密情報管理)
 
-本リポジトリでは、実行ログや出力される構成情報（JSON）に含まれうるセンシティブデータ（アカウントID、IPアドレス、リソースARN等）の漏洩を防ぐため、`.gitignore` を活用した管理を推奨している。
+本リポジトリでは、実行ログや出力される構成情報（JSON）に含まれうるセンシティブデータ（アカウントID、IPアドレス、リソースARN等）の漏洩を防ぐため、`.gitignore` を活用した管理を推奨しています。
 
 `.gitignore` 設定例:
 
@@ -362,36 +328,28 @@ security-groups|aws ec2 describe-security-groups
 
 本プロジェクトが最終的に目指す姿。
 
-```text
-AWS Environment
-        ↓
-Automatic Collection
-        ↓
-JSON Snapshot
-        ↓
-GitHub
-        ↓
-AI Analysis
-        ↓
-Parameter Sheet
-        ↓
-Design Document
-        ↓
-CDK Source Code
-        ↓
-Pull Request
+```mermaid
+flowchart TD
+    A[AWS Environment] --> B[Automatic Collection]
+    B --> C[JSON Snapshot]
+    C --> D[GitHub]
+    D --> E[AI Analysis]
+    E --> F[Parameter Sheet]
+    F --> G[Design Document]
+    G --> H[CDK Source Code]
+    H --> I[Pull Request]
 ```
 
-AWS環境の構成情報を継続的に収集し、構成変更履歴を資産として蓄積する。
+AWS環境の構成情報を継続的に収集し、構成変更履歴を資産として蓄積できます。
 
 そして同じ情報源を利用して、
 - 構成管理
 - 設計書管理
 - IaC管理
 
-を実現する。
+を実現します。
 
-従来は個別に管理されていた「AWS環境」「パラメータシート」「設計書」「IaCコード」を、単一の情報源から生成できる状態を目指す。
+従来は個別に管理されていた「AWS環境」「パラメータシート」「設計書」「IaCコード」を、単一の情報源から生成できる状態を目指します。
 
-最終的には、AWS環境の変更が設計書やIaCへ継続的に反映される仕組みを構築し、「実環境」と「ドキュメント」と「コード」の乖離をなくすことを目標とする。
+最終的には、AWS環境の変更が設計書やIaCへ継続的に反映される仕組みを構築し、「実環境」と「ドキュメント」と「コード」の乖離をなくすことを目標とします。
 
