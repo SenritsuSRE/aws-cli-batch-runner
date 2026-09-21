@@ -4,11 +4,12 @@ AIと人間の責任境界を明確にし、AWS環境の構造化・IaC・ドキ
 
 ## Background
 
-「AWSの構成を調べて」とAIに指示すれば、それらしいCLIコマンドを生成し、実行してくれる時代です。
+「AWSの構成を調べて」とAIに指示すれば、それらしいCLIコマンドを生成し、実行してくれる時代です。<br>
 しかし、私たちはAIをそのように使いたいとは思いません。
-情報の選択、そして何を正とするかのコントロールは、常に人間（設計者）の手元に残すべきだと考えるからです。
 
-何を収集し、どのコマンドを実行するのかの定義（backup_targets.md）は、まさにそのエンジニアの意思の表れであり、信頼性の担保そのものです。
+情報の選択、そして何を正とするかの判断の帰結は、常に人間（設計者）の手元に残されるからです。
+
+何を収集し、どのコマンドを実行するのかの定義は、アーキテクチャの意思の表れであり、信頼性の担保そのものです。<br>
 本ツールは、人間が定義した確かなコマンド群から得られたJSONスナップショットをGitで履歴管理し、AIの圧倒的な処理能力で解析・ドキュメント化・CDKコード化へと昇華させるためのパイプラインです。
 
 ## 🔒 Security Note / セキュリティについて
@@ -26,12 +27,12 @@ AIと人間の責任境界を明確にし、AWS環境の構造化・IaC・ドキ
 flowchart TD
     subgraph Human ["Human Responsibility"]
         A[AWS Environment] --> B[aws_backup.zsh]
-        C[backup_targets.md<br><b>人間がコマンドを定義</b>] --> B
+        C["backup_targets.md<br/><b>人間がコマンドを定義</b>"] --> B
     end
 
     subgraph Git ["Git Management"]
-        B --> D["JSON Snapshot<br>(latest/*.json)"]
-        D --> E[GitHub (Private)]
+        B --> D["JSON Snapshot<br/>(latest/*.json)"]
+        D --> E["GitHub (Private)"]
     end
 
     subgraph AI ["AI Acceleration"]
