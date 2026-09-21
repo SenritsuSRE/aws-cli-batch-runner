@@ -38,8 +38,10 @@ flowchart TD
 
     subgraph AI ["AI Acceleration"]
         E --> F[Claude Code / ChatGPT]
-        F --> G[Documentation & CDK]
+        F --> G["Draft Generation<br/>(Docs & CDK)"]
     end
+
+    G --> H["<b>Human Review & Commit</b><br/>人間が判断・採用"]
 ```
 
 ### 1. Separation of Concerns
