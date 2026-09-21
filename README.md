@@ -1,11 +1,15 @@
 # AWS Config Backup
 
-AWS環境を構造化データ(JSON)へ変換し、設計書作成および IaC(CDK) 化を支援するためのスクリプトです。
+このリポジトリは、人間の意志と責任でAWS環境を構造化し、IaCとドキュメント化を加速させるためのツールを提供します。
 
-本プロジェクトは単なる AWS バックアップツールではなく、
-AWS 環境の構成情報を継続的に収集し、GitHub 上で履歴管理し、さらに AI が解析可能な形式へ変換することで、
-ドキュメント作成と IaC 化を加速させることを目的としています。
+## Background
 
+「AWSの構成を調べて」とAIに指示すれば、それらしいCLIコマンドを生成し、実行してくれる時代です。
+しかし、私たちはAIをそのように使いたいとは思いません。
+情報の選択、そして何を正とするかのコントロールは、常に人間（設計者）の手元に残すべきだと考えるからです。
+
+何を収集し、どのコマンドを実行するのかの定義（backup_targets.md）は、まさにそのエンジニアの意思の表れであり、信頼性の担保そのものです。
+本ツールは、人間が定義した確かなコマンド群から得られたJSONスナップショットをGitで履歴管理し、AIの圧倒的な処理能力で解析・ドキュメント化・CDKコード化へと昇華させるためのパイプラインです。
 
 ## 🔒 Security Note / セキュリティについて
 本リポジトリはAWS構成を自動収集するスクリプト（エンジン）を提供しています。
@@ -16,76 +20,26 @@ AWS 環境の構成情報を継続的に収集し、GitHub 上で履歴管理し
 
 ---
 
-## Background
-
-既存 AWS 環境の調査では、一般的に以下のような作業が発生します。
-
-```mermaid
-flowchart TD
-    A[AWS Console] --> B[画面確認]
-    B --> C[Excel転記]
-    C --> D[構成図作成]
-    D --> E[パラメータシート作成]
-    E --> F[基本設計書作成]
-```
-
-この方法には以下の課題があります。
-
-- 調査コストが高い
-- 転記ミスが発生しやすい
-- 設計書と実環境が乖離しやすい
-- 属人化しやすい
-- IaC 化の事前調査に多くの時間を要する
-
-本プロジェクトは、この手作業中心のプロセスを自動化するために作られたものです。
-
----
-
-## Concept
-
-本プロジェクトの目的は AWS 環境を AI が理解可能な形式へ変換することです。
-
-```mermaid
-flowchart TD
-    A[AWS Environment] --> B[AWS CLI]
-    B --> C[JSON]
-    C --> D[GitHub]
-    D --> E[AI Analysis]
-    E --> F[Parameter Sheet]
-    F --> G[Design Document]
-    G --> H[Infrastructure as Code]
-```
-
-人間が AWS Console を見ながら設計書を書くのではなく、
-
-- AWS から構成情報を取得する
-- JSON として保存する
-- GitHub で履歴管理する
-- AI に分析させる
-- 設計書を生成する
-- CDKへ変換する
-
-という流れを実現します。
-
----
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    A[AWS Environment] --> B[aws_backup.zsh]
-    B --> C[backup_targets]
-    C --> D["JSON Snapshot<br>(latest/*.json)"]
-    D --> E[GitHub]
-    E --> F[Claude Code / ChatGPT]
-    F --> G[Documentation]
-    G --> H[AWS CDK]
+    subgraph Human ["Human Responsibility"]
+        A[AWS Environment] --> B[aws_backup.zsh]
+        C[backup_targets.md<br><b>人間がコマンドを定義</b>] --> B
+    end
+
+    subgraph Git ["Git Management"]
+        B --> D["JSON Snapshot<br>(latest/*.json)"]
+        D --> E[GitHub (Private)]
+    end
+
+    subgraph AI ["AI Acceleration"]
+        E --> F[Claude Code / ChatGPT]
+        F --> G[Documentation & CDK]
+    end
 ```
-
-
----
-
-## Design Policy
 
 ### 1. Separation of Concerns
 
@@ -107,17 +61,8 @@ security-groups|aws ec2 describe-security-groups
 kms-keys|aws kms list-keys
 ```
 
-バックアップ対象を追加する場合でも、スクリプト本体を修正する必要はありません。
-新しいAWSサービスをバックアップ対象へ追加する場合は、`backup_targets.md` にAWS CLIコマンドを1行追加するだけでOKです。
-
-これにより、
-
-- 処理ロジックと設定を分離できる
-- 保守性を向上できる
-- 拡張性を向上できる
-- AWSサービス追加時の対応コストを削減できる
-
-というメリットがあります。
+- バックアップ対象を追加する場合でも、スクリプト本体を修正する必要なし
+- 新しいAWSサービスをバックアップ対象へ追加する場合は、`backup_targets.md` にAWS CLIコマンドを1行追加するだけでOK
 
 ---
 
@@ -131,7 +76,7 @@ flowchart TD
     B --> C[Git]
 ```
 
-これにより、
+これにより、以下を実現します。
 
 - 構成変更履歴の追跡
 - git diff による差分確認
@@ -141,17 +86,6 @@ flowchart TD
 
 が可能となります。
 
-JSONをGit管理することで、AWS環境のスナップショットを継続的に蓄積できます。
-
-また、過去のコミットを参照することで、
-
-- いつ変更されたか
-- 何が変更されたか
-- 誰が変更したか
-
-を追跡できるため、構成管理の品質向上にも繋がります。
-
-本プロジェクトでは、Gitを単なるソースコード管理ツールではなく、AWS構成管理データベースとして活用します。
 
 ---
 
@@ -159,14 +93,7 @@ JSONをGit管理することで、AWS環境のスナップショットを継続�
 
 本プロジェクトは AI 活用を前提とします。
 
-AI は AWS Console を直接参照できません。
-AI が AWS CLIコマンドを実行することはできますが、この
-一方で、JSON は構造化データであり、そのまま解析できます。
-
 そのため本プロジェクトでは、`Human Readable` よりも `AI Readable` を重視しています。
-
-取得した JSON は単なるバックアップデータではありません。
-AI による分析やドキュメント生成のための入力データとして利用することを前提としています。
 
 例えば、収集した JSON を Claude や ChatGPT に読み込ませることで、
 
@@ -265,6 +192,7 @@ aws-config-backup/logs/
 ```
 
 ※ チーム内でリポジトリをプライベート運用し、構成変更履歴をGitで追跡する場合は `latest/*.json` をコミット対象とします。
+※　その場合は前述の通り、必ずリポジトリをPrivateで作成することを推奨します。
 
 ---
 
