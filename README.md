@@ -44,73 +44,19 @@ flowchart TD
     G --> H["<b>Human Review & Commit</b><br/>人間が判断・採用"]
 ```
 
-### 1. Separation of Concerns
+### 役割分担
 
-バックアップ対象と処理ロジックを分離します。
+#### Human Responsibility（人間の責任とコントロール）
+- 何を収集し、どのコマンドを実行するかの定義（backup_targets.md）は人間が手動でコントロール
+- また、AIが生成した成果物の最終確認・採用も人間が担当
 
-バックアップ対象は `backup_targets.md` に定義します。
+#### Git Management（Gitによる履歴管理）
+- 人間が定義した確かなコマンド群から得られたJSONスナップショットをそのままGitで管理
+- 差分や変更履歴を追跡可能な状態で保つ
 
-形式:
-
-```text
-output-file-name|aws cli command
-```
-
-例:
-
-```text
-vpcs|aws ec2 describe-vpcs
-security-groups|aws ec2 describe-security-groups
-kms-keys|aws kms list-keys
-```
-
-- バックアップ対象を追加する場合でも、スクリプト本体を修正する必要なし
-- 新しいAWSサービスをバックアップ対象へ追加する場合は、`backup_targets.md` にAWS CLIコマンドを1行追加するだけでOK
-
----
-
-### 2. Git First
-
-取得した構成情報は JSON のまま Git 管理する。
-
-```mermaid
-flowchart TD
-    A[AWS] --> B[JSON]
-    B --> C[Git]
-```
-
-これにより、以下を実現します。
-
-- 構成変更履歴の追跡
-- git diff による差分確認
-- Pull Request レビュー
-- 構成監査
-- 設計書と実環境の比較
-
-が可能となります。
-
-
----
-
-### 3. AI First
-
-本プロジェクトは AI 活用を前提とします。
-
-そのため本プロジェクトでは、`Human Readable` よりも `AI Readable` を重視しています。
-
-例えば、収集した JSON を Claude や ChatGPT に読み込ませることで、
-
-- AWS 構成分析
-- リソース依存関係分析
-- パラメータシート作成
-- 基本設計書作成
-- 詳細設計書作成
-- システム構成図作成
-- CDK 化方針策定
-
-などを支援できます。
-
-本プロジェクトの本質は、**AWS 環境を AI が理解可能な構造化データへ変換すること** にあリます。
+#### AI Acceleration（AIによる分析・生成）
+- Git上の構造化データをClaudeやChatGPTに読み込む
+- パラメータシート、設計書、CDKコードなどのドラフト生成を高速化
 
 ---
 
