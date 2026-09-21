@@ -56,7 +56,6 @@ flowchart TD
     G --> H[Infrastructure as Code]
 ```
 
-
 人間が AWS Console を見ながら設計書を書くのではなく、
 
 - AWS から構成情報を取得する
@@ -82,7 +81,7 @@ flowchart TD
     E --> F[Claude Code / ChatGPT]
     F --> G[Documentation]
     G --> H[AWS CDK]
-```
+
 
 ---
 
